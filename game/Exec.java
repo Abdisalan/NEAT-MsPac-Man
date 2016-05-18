@@ -1,24 +1,17 @@
 package game;
 
 import ai.fun.ghosts.MyFunGhosts;
+import game.controllers.COMP135.EvolvedMsPacMan;
 import game.controllers.Human;
+import game.controllers.COMP135.NEAT;
 import game.controllers.PacManController;
 import game.controllers.GhostController;
-import game.controllers.examples.AttractRepelGhosts;
-import game.controllers.examples.Legacy;
-import game.controllers.examples.Legacy2TheReckoning;
-import game.controllers.examples.NearestPillPacMan;
-import game.controllers.examples.NearestPillPacManVS;
-import game.controllers.examples.RandomGhosts;
-import game.controllers.examples.RandomNonRevPacMan;
-import game.controllers.examples.RandomPacMan;
 import game.core.G;
 import game.core.GameView;
 import game.core._G_;
 import game.core.Replay;
 import game.core._RG_;
 
-import game.entries.ghosts.*;
 import game.entries.pacman.*;
 
 /*
@@ -34,8 +27,9 @@ public class Exec
 	public static void main(String[] args)
 	{
 		Exec exec=new Exec();
-		
-		//exec.runGameTimed(new Human(), new MyFunGhosts(), true);
+
+		//exec.replayGame("random-pacman.txt");
+		exec.runGameTimed(new EvolvedMsPacMan(), new MyFunGhosts(), true);
 		
 		//exec.runGameTimed(new MyPacMan(), new Legacy2TheReckoning(), true);
 		//exec.runExperiment(new MyPacMan(), new Legacy(), 100);
@@ -45,7 +39,7 @@ public class Exec
 		
 		//this can be used for numerical testing (non-visual, no delays)
 		//exec.runExperiment(new MyPacMan(),new RandomGhosts(),100);
-		exec.runOptimizeExperiment(new Legacy(), 10, 20, 40, 40, 60, 0, 10, 0, 10, 5);
+		//exec.runOptimizeExperiment(new Legacy(), 10, 20, 40, 40, 60, 0, 10, 0, 10, 5);
 		//exec.runGameTimed(new MyPacMan(), new RandomGhosts(), true);
 		
 
@@ -80,7 +74,7 @@ public class Exec
      * Running many games and looking at the average score (and standard deviation/error) helps to get a better
      * idea of how well the controller is likely to do in the competition.
      */
-    public void runExperiment(PacManController pacManController,GhostController ghostController,int trials)
+    public void runExperiment(PacManController pacManController, GhostController ghostController, int trials)
     {
     	int[] scores = new int[trials];
     	
