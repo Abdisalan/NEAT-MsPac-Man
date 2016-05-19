@@ -29,7 +29,9 @@ public class Exec
 		Exec exec=new Exec();
 
 		//exec.replayGame("random-pacman.txt");
-		exec.runGameTimed(new EvolvedMsPacMan(), new MyFunGhosts(), true);
+        PacManController pmc = new EvolvedMsPacMan();
+		exec.runNeuralEvolution(pmc, new MyFunGhosts(), 10000); //TRAIN
+        exec.runGame(pmc, new MyFunGhosts(), true, 10); //RUN
 		
 		//exec.runGameTimed(new MyPacMan(), new Legacy2TheReckoning(), true);
 		//exec.runExperiment(new MyPacMan(), new Legacy(), 100);
@@ -67,7 +69,40 @@ public class Exec
     protected PacMan pacMan;
     protected Ghosts ghosts;
     protected boolean pacmanPlayed,ghostsPlayed;
-   
+
+	/**
+	 *
+	 * Run Neural Evolution
+     */
+
+	public void runNeuralEvolution(PacManController pmc, GhostController gc, int cycles) {
+		NEAT neat = ((EvolvedMsPacMan) pmc).neuralnetwork;
+		game = new _G_();
+
+		for (int i = 0; i < cycles; i++) {
+			game.newGame();
+
+			while(game.gameOver() == false) {
+				long due = System.currentTimeMillis() + G.DELAY;
+				game.advanceGame(pmc.getAction(game.copy(), due), gc.getActions(game.copy(), due));
+			}
+
+			int fitness = game.getScore();
+			neat.setCurrentFitness(fitness); // update fitness
+
+            if (fitness > neat.mspacman_pool.maxFitness) {
+                neat.mspacman_pool.maxFitness = fitness;
+                System.out.println("Generation: " + neat.mspacman_pool.generation +
+                        " Species: " + neat.mspacman_pool.currentSpecies +
+                        " Genome: " + neat.mspacman_pool.currentGenome +
+                        " Fitness: " + neat.mspacman_pool.maxFitness);
+            }
+
+			//go to next genome or species
+			neat.nextGenome();
+		}
+	}
+
     /*
      * For running multiple games without visuals. This is useful to get a good idea of how well a controller plays
      * against a chosen opponent: the random nature of the game means that performance can vary from game to game. 

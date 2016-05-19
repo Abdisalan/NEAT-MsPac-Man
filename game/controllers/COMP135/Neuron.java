@@ -36,7 +36,7 @@ public class Neuron {
         Set<Integer> keys = neurons.keySet();
         for (Integer i : keys) {
             n = n - 1;
-            if (n == 0) return i;
+            if (n <= 0) return i;
         }
 
         return 0;

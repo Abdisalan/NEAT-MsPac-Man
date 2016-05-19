@@ -8,6 +8,16 @@ public class Network {
 
     public Network() {
         neurons = new HashMap<>();
+
+        //setup input Neurons
+        for (int i = 0; i < NEAT.NUM_INPUTS; i++) {
+            neurons.put(i, new Neuron());
+        }
+
+        //setup output Neurons with space for hidden Neurons
+        for (int i = NEAT.MAX_NODES; i < (NEAT.NUM_OUTPUTS + NEAT.MAX_NODES); i++) {
+            neurons.put(i, new Neuron());
+        }
     }
     // default constructor setup
     public Network(Genome g) {

@@ -53,8 +53,13 @@ public class Genome {
             return;
         }
 
+        // quit if they're both input nodes
+        if (neuron1 >= NEAT.MAX_NODES && neuron2 >= NEAT.MAX_NODES) {
+            return;
+        }
+
         // swap output and input
-        if (neuron2 <= NEAT.NUM_INPUTS) { // TODO this will affect what input node pacman gets....
+        if (neuron2 <= NEAT.NUM_INPUTS) {
             int tmp = neuron1;
             neuron1 = neuron2;
             neuron2 = tmp;
@@ -62,7 +67,7 @@ public class Genome {
 
         newLink.into = neuron1;
         newLink.out = neuron2;
-        if (forceBias) newLink.into = NEAT.NUM_INPUTS;
+        if (forceBias) newLink.into = NEAT.NUM_INPUTS - 1;
 
         if (Gene.containsLink(g.genes, newLink)) return; // don't want to repeat any nodes...
 
@@ -70,6 +75,11 @@ public class Genome {
         newLink.weight = (Math.random()* 4) - 2; // could create negative weight
 
         g.genes.add(newLink);
+
+        if (neuron2 >= NEAT.MAX_NODES) { // its an output node
+            Neuron output = g.network.neurons.get(neuron2);
+            output.incoming.put(output.incoming.size(), newLink);
+        }
     }
 
     public void nodeMutate(Genome g) {
@@ -134,9 +144,9 @@ public class Genome {
         for (double i = g.BIAS_MUTATION_CHANCE; i > 0; i--) {
             if (Math.random() < i) linkMutate(g, true);
         }
-//        for (double i = g.NODE_MUTATION_CHANCE; i > 0; i--) {
-//            if (Math.random() < i) nodeMutate(g);
-//        }
+        for (double i = g.NODE_MUTATION_CHANCE; i > 0; i--) {
+            if (Math.random() < i) nodeMutate(g);
+        }
         for (double i = g.ENABLE_MUTATION_CHANCE; i > 0; i--) {
             if (Math.random() < i) enableDisableMutate(g, true);
         }
@@ -155,6 +165,7 @@ public class Genome {
     // deep copy constructor
     public Genome(Genome g) {
         this.genes = new ArrayList<>();
+        this.network = new Network(g);
         for (int i = 0; i < g.genes.size(); i++) {
             this.genes.add(new Gene(g.genes.get(i)));
         }
@@ -177,6 +188,9 @@ public class Genome {
 
     // cross over two Genomes constructor
     public Genome(Genome g1, Genome g2) {
+        this.genes = new ArrayList<>();
+        this.network = new Network();
+
         //make sure g1 has a higher fitness
         if (g2.fitness > g1.fitness) {
             Genome temp = g1;
@@ -184,11 +198,10 @@ public class Genome {
             g2 = temp;
         }
 
-        Genome child = new Genome();
         //make a dictionary that matches the genes' innovation of g2 to the gene
         HashMap<Integer, Gene> innovations = new HashMap<>();
         for (Gene gene2 : g2.genes) {
-            innovations.put(gene2.innovation, gene2); // copy the gene or put reference??
+            innovations.put(gene2.innovation, new Gene(gene2)); // copy the gene or put reference?? copy it!
         }
 
         //distribute the genes to the child randomly from the two Genomes
@@ -196,22 +209,22 @@ public class Genome {
             Gene gene2 = innovations.get(gene1.innovation);
             int rand = (int) (Math.random()*2); // 50% chance for inheriting Genome1 vs Genome2
             if (gene2 != null && rand == 1 && gene2.enabled) {
-                child.genes.add(new Gene(gene2));
+                this.genes.add(new Gene(gene2));
             } else {
-                child.genes.add(new Gene(gene1));
+                this.genes.add(new Gene(gene1));
             }
         }
 
         //set the maxneurons for child
-        child.maxNeurons = Math.max(g1.maxNeurons, g2.maxNeurons);
+        this.maxNeurons = Math.max(g1.maxNeurons, g2.maxNeurons);
 
         //pass over all mutation rates of more fit Genome 1
-        child.CONNECTIONS_MUTATION_CHANCE = g1.CONNECTIONS_MUTATION_CHANCE;
-        child.LINK_MUTATION_CHANCE = g1.LINK_MUTATION_CHANCE;
-        child.BIAS_MUTATION_CHANCE = g1.BIAS_MUTATION_CHANCE;
-        child.NODE_MUTATION_CHANCE = g1.NODE_MUTATION_CHANCE;
-        child.ENABLE_MUTATION_CHANCE = g1.ENABLE_MUTATION_CHANCE;
-        child.DISABLE_MUTATION_CHANCE = g1.DISABLE_MUTATION_CHANCE;
-        child.STEP_SIZE = g1.STEP_SIZE;
+        this.CONNECTIONS_MUTATION_CHANCE = g1.CONNECTIONS_MUTATION_CHANCE;
+        this.LINK_MUTATION_CHANCE = g1.LINK_MUTATION_CHANCE;
+        this.BIAS_MUTATION_CHANCE = g1.BIAS_MUTATION_CHANCE;
+        this.NODE_MUTATION_CHANCE = g1.NODE_MUTATION_CHANCE;
+        this.ENABLE_MUTATION_CHANCE = g1.ENABLE_MUTATION_CHANCE;
+        this.DISABLE_MUTATION_CHANCE = g1.DISABLE_MUTATION_CHANCE;
+        this.STEP_SIZE = g1.STEP_SIZE;
     }
 }

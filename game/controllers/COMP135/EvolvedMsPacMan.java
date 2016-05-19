@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public class EvolvedMsPacMan implements PacManController {
     public static final int MAX_PILL_DISTANCE = 200;
-    public static final int MAX_JUNCTION_DISTANCE = 10;
+    public static final int MAX_JUNCTION_DISTANCE = 26;
     public static final int MAX_GHOST_DISTANCE = 200;
 
     public NEAT neuralnetwork;

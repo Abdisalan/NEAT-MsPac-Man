@@ -7,8 +7,8 @@ public class NEAT {
     /* class members
      */
     public Pool mspacman_pool;
-    public static int POPULATION = 100;
-    public static int NUM_INPUTS = 10;
+    public static int POPULATION = 5000;
+    public static int NUM_INPUTS = 12;
     public static int NUM_OUTPUTS = 4;
     public static int STALE_SPECIES = 15;
     public static double PERTURB_CHANCE = 0.90;
@@ -58,8 +58,10 @@ public class NEAT {
         double maxOutputValue = Integer.MIN_VALUE;
         for (int i = MAX_NODES; i < MAX_NODES + NUM_OUTPUTS; i++) {
             Neuron output = net.neurons.get(i);
+//            System.out.println(output.value);
             if (output.value > maxOutputValue) {
                 maxOutputIndex = i;
+//                System.out.println(i);
                 maxOutputValue = output.value;
             }
         }
@@ -70,6 +72,12 @@ public class NEAT {
 
     public static double sigmoid(double x) {
         return (1/( 1 + Math.pow(Math.E,(-1*x))));
+    }
+
+    public void setCurrentFitness(int fitness) {
+        Species s = mspacman_pool.species.get(mspacman_pool.currentSpecies);
+        Genome g = s.genomes.get(mspacman_pool.currentGenome);
+        g.fitness = fitness;
     }
 
     public void rankGlobally(Pool p){ //currently depending on Pool from argument
@@ -114,8 +122,8 @@ public class NEAT {
 
            if (cutToOne) remaining = 1;
 
-           for (int i = 0; i < remaining; i++) {
-               s.genomes.remove(s.genomes.size() - 1 - i);
+           while (s.genomes.size() > remaining) {
+               s.genomes.remove(s.genomes.size() - 1);
            }
 
        }
@@ -131,7 +139,6 @@ public class NEAT {
             Genome g = s.genomes.get((int) (Math.random()*s.genomes.size()));
             child = new Genome(g);
         }
-
         if (child != null) child.mutate(child);
         return child;
     }
@@ -204,11 +211,12 @@ public class NEAT {
     public void nextGenome() {
         mspacman_pool.currentGenome++;
         if (mspacman_pool.currentGenome >= mspacman_pool.species.get(mspacman_pool.currentSpecies).genomes.size()) {
-            mspacman_pool.currentGenome = 1;
+            mspacman_pool.currentGenome = 0;
             mspacman_pool.currentSpecies++;
             if (mspacman_pool.currentSpecies >= mspacman_pool.species.size()) {
                 newGeneration(mspacman_pool);
-                mspacman_pool.currentSpecies = 1;
+                mspacman_pool.generation++;
+                mspacman_pool.currentSpecies = 0;
             }
         }
     }

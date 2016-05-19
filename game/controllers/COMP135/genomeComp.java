@@ -9,6 +9,7 @@ public class genomeComp implements Comparator<Genome> {
     @Override
     public int compare(Genome g1, Genome g2) {
         if (g1.fitness < g2.fitness) return 1;
+        if (g1.fitness == g2.fitness) return 0;
         else return -1;
     }
 }
